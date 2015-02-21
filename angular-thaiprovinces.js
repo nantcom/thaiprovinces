@@ -8482,148 +8482,113 @@
     };
 
     angular.module('nantcom-thaiprovinces', []).config(['$provide', function ($provide) {
+        
         $provide.factory('thaiprovinces', function () {
-            var instance = {};
-            instance.all = getProvinces();
+            var thaiprovinces2 = function () {
 
-            instance.currentProvince = null;
-            instance.districtList = null;
-            instance.setProvince = function (province) {
+                var $me = this;
 
-                instance.currentProvince = instance.all[province];
+                $me.provinceList = [];
+                $me.districtList = [];
+                $me.subDistrictList = [];
 
-                if (instance.currentProvince == null) {
+                var currentProvince = null;
+                var currentDistrict = null;
+                var currentSubdistrict = null;
 
-                    instance.districtList = [];
-                    instance.subDistrictList = [];
 
-                } else {
+                // Initialize thaiprovince handler
+                // parameters:
+                // - $scope = angular scope object
+                // - provinceExpression = angular expression to watch for province change default is 'object.Address_State'
+                // - districtExpression = angular expression to watch for district change default is 'object.Address_District'
+                // - subdistrictExpression = angular expression to watch for province change default is 'object.Address_Subdistrict'
+                // - postalCodeExpression = angular expression to access the postal code, default is 'object.Address_PostalCode'
 
-                    instance.districtList = instance.currentProvince.children;
-                    instance.subDistrictList = [];
-                }
-            };
+                $me.initialize = function ($scope, provinceExpression, districtExpression, subdistrictExpression, postalCodeExpression) {
 
-            instance.currentDistrict = null;
-            instance.subDistrictList = null;
-            instance.setDistrict = function (district) {
-
-                instance.currentDistrict = instance.currentProvince.children[district];
-
-                if (instance.currentDistrict == null) {
-
-                    instance.subDistrictList = [];
-
-                } else {
-
-                    instance.subDistrictList = instance.currentDistrict.children;
-                }
-
-            };
-
-            return instance;
-        });
-
-        $provide.factory('thaiprovinces2', function () {
-            var me = {};
-
-            me.provinceList = [];
-            me.districtList = [];
-            me.subDistrictList = [];
-
-            var currentProvince = null;
-            var currentDistrict = null;
-            var currentSubdistrict = null;
-
-            // Initialize thaiprovince handler
-            // parameters:
-            // - $scope = angular scope object
-            // - provinceExpression = angular expression to watch for province change default is 'object.Address_State'
-            // - districtExpression = angular expression to watch for district change default is 'object.Address_District'
-            // - subdistrictExpression = angular expression to watch for province change default is 'object.Address_Subdistrict'
-            // - postalCodeExpression = angular expression to access the postal code, default is 'object.Address_PostalCode'
-
-            me.initialize = function ($scope, provinceExpression, districtExpression, subdistrictExpression, postalCodeExpression) {
-
-                if (me.provinceList.length > 0) {
-                    return;
-                }
-
-                if (provinceExpression == null) {
-                    provinceExpression = "object.Address_State";
-                }
-
-                if (districtExpression == null) {
-                    districtExpression = "object.Address_District";
-                }
-
-                if (subdistrictExpression == null) {
-                    subdistrictExpression = "object.Address_Subdistrict";
-                }
-
-                if (postalCodeExpression == null) {
-                    postalCodeExpression = "object.Address_PostalCode";
-                }
-
-                $scope.$watch(provinceExpression, function (newValue, oldValue) {
-
-                    currentProvince = province[newValue];
-
-                    if (currentProvince == null) {
-
-                        me.districtList = [];
-                        me.subDistrictList = [];
-
-                    } else {
-
-                        me.districtList = currentProvince.children;
-                        me.subDistrictList = [];
-                    }
-
-                });
-
-                $scope.$watch(districtExpression, function (newValue, oldValue) {
-
-                    if (currentProvince == null) {
+                    if ($me.provinceList.length > 0) {
                         return;
                     }
 
-                    currentDistrict = currentProvince.children[newValue];
-
-                    if (currentDistrict == null) {
-
-                        me.subDistrictList = [];
-
-                    } else {
-
-                        me.subDistrictList = currentDistrict.children;
+                    if (provinceExpression == null) {
+                        provinceExpression = "object.Address_State";
                     }
 
-                });
-
-                $scope.$watch(subdistrictExpression, function (newValue, oldValue) {
-
-                    if (currentDistrict == null) {
-                        return;
+                    if (districtExpression == null) {
+                        districtExpression = "object.Address_District";
                     }
 
-                    currentSubdistrict = currentDistrict.children[newValue];
-
-                    if (currentSubdistrict == null) {
-                        return
+                    if (subdistrictExpression == null) {
+                        subdistrictExpression = "object.Address_Subdistrict";
                     }
 
-                    var postCode = currentSubdistrict.postcode;
+                    if (postalCodeExpression == null) {
+                        postalCodeExpression = "object.Address_PostalCode";
+                    }
 
-                    // set the postalCode using the given expression
-                    $scope.$eval(postalCodeExpression + "='" + postCode + "'");
+                    $scope.$watch(provinceExpression, function (newValue, oldValue) {
 
-                });
+                        currentProvince = province[newValue];
 
-                me.provinceList = getProvinces();
+                        if (currentProvince == null) {
+
+                            $me.districtList = [];
+                            $me.subDistrictList = [];
+
+                        } else {
+
+                            $me.districtList = currentProvince.children;
+                            $me.subDistrictList = [];
+                        }
+
+                    });
+
+                    $scope.$watch(districtExpression, function (newValue, oldValue) {
+
+                        if (currentProvince == null) {
+                            return;
+                        }
+
+                        currentDistrict = currentProvince.children[newValue];
+
+                        if (currentDistrict == null) {
+
+                            $me.subDistrictList = [];
+
+                        } else {
+
+                            $me.subDistrictList = currentDistrict.children;
+                        }
+
+                    });
+
+                    $scope.$watch(subdistrictExpression, function (newValue, oldValue) {
+
+                        if (currentDistrict == null) {
+                            return;
+                        }
+
+                        currentSubdistrict = currentDistrict.children[newValue];
+
+                        if (currentSubdistrict == null) {
+                            return
+                        }
+
+                        var postCode = currentSubdistrict.postcode;
+
+                        // set the postalCode using the given expression
+                        $scope.$eval(postalCodeExpression + "='" + postCode + "'");
+
+                    });
+
+                    $me.provinceList = getProvinces();
+                };
+
+                return $me;
             };
 
-            return me;
+            return thaiprovinces2;
         });
     }]);
 
