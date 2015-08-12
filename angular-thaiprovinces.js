@@ -8481,7 +8481,9 @@
 
     };
 
-    angular.module('nantcom-thaiprovinces', []).config(['$provide', function ($provide) {
+    var module = angular.module('nantcom-thaiprovinces', []);
+
+    module.config(['$provide', function ($provide) {
         
         $provide.factory('thaiprovinces', function () {
             var thaiprovinces2 = function () {
@@ -8590,6 +8592,94 @@
 
             return thaiprovinces2;
         });
+    }]);
+    
+    module.directive('ncThaiprovince', ['$compile', function ($compile) {
+
+        function link($scope, element, attrs) {
+
+            if ($scope.thaiprovinces != null) {
+
+                throw "Only one thaiprovince per scope is supported";
+            }
+
+            $scope.thaiprovinces = {};
+            var $me = $scope.thaiprovinces;
+
+            $me.provinceList = getProvinces();
+            $me.districtList = [];
+            $me.subDistrictList = [];
+
+            $me.selectedProvince = null;
+            $me.selectedDistrict = null;
+            $me.selectedSubdistrict = null;
+            $me.postalCode = null;
+
+            var currentProvince;
+            var currentDistrict;
+            var currentSubDistrict;
+
+            $scope.$watch("thaiprovinces.selectedProvince", function (newValue, oldValue) {
+
+                currentProvince = province[newValue];
+
+                if (currentProvince == null) {
+
+                    $me.districtList = [];
+                    $me.subDistrictList = [];
+
+                } else {
+
+                    $me.districtList = currentProvince.children;
+                    $me.subDistrictList = [];
+                }
+
+            });
+
+            $scope.$watch("thaiprovinces.selectedDistrict", function (newValue, oldValue) {
+
+                if (currentProvince == null) {
+                    return;
+                }
+
+                currentDistrict = currentProvince.children[newValue];
+
+                if (currentDistrict == null) {
+
+                    $me.subDistrictList = [];
+
+                } else {
+
+                    $me.subDistrictList = currentDistrict.children;
+                }
+
+            });
+
+            $scope.$watch("thaiprovinces.selectedSubdistrict", function (newValue, oldValue) {
+
+                if (currentDistrict == null) {
+                    return;
+                }
+
+                currentSubDistrict = currentDistrict.children[newValue];
+
+                if (currentSubDistrict == null) {
+                    return
+                }
+
+                var postCode = currentSubDistrict.postcode;
+
+                // set the postalCode using the given expression
+                $me.postalCode = postCode;
+
+            });
+        }
+
+        return {
+            restrict: 'A',
+            link: link,
+            scope: false,
+        };
     }]);
 
 })();
